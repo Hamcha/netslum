@@ -6,6 +6,7 @@ module Paradise.Utils
 , boldCode
 , normalCode
 , reverseCode
+, homeRowCode
 ) where
 
 import qualified Data.ByteString.Char8 as B
@@ -22,6 +23,9 @@ stripHTML html = do
 
 clearScreenCode :: B.ByteString
 clearScreenCode = "\ESC[2J"
+
+homeRowCode :: B.ByteString
+homeRowCode = "\ESC[H"
 
 boldCode :: B.ByteString
 boldCode = "\ESC[1m"
