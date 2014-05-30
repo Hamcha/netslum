@@ -3,9 +3,10 @@ module Paradise.Client
 , PlayerData (..)
 ) where
 
---import qualified Paradise.API as API
+import qualified Data.ByteString.Char8 as B
 
-type VesselID = Int
+type VesselID = B.ByteString
 
-data PlayerData = PlayerData { vessel :: VesselID
+data PlayerData = PlayerData { vessel   :: VesselID
+                             , position :: VesselID
                              }
