@@ -2,6 +2,7 @@ all: netslum
 
 clean:
 	rm -rf *.hi *.o */*.hi */*.o
+	rm -rf netslum
 	cabal clean
 
 netslum:

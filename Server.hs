@@ -6,19 +6,29 @@ module Server
 
 import           Control.Concurrent
 import           Control.Monad
+import qualified Data.ByteString.Char8 as B
 import           Network
-import qualified Network.Socket as NS
-import           Network.Socket.ByteString
+import qualified Paradise.Client as Paradise
+import           System.IO
 
-handle :: Socket -> IO ()
-handle client = do
-    sendAll client "POOF!"
-    sClose client
+command :: Handle -> Paradise.PlayerData -> B.ByteString
+           -> Paradise.PlayerData
+command client pdata line = pdata
+
+handle :: Handle -> Paradise.PlayerData -> Bool -> IO ()
+handle client pdata True  = return ()
+handle client pdata False = do
+    -- Read input and execute it
+    line  <- B.hGetLine client
+    let pdata = command client pdata line
+    -- Continue if there is more data
+    hIsEOF client >>= handle client pdata
 
 acceptAll :: Socket -> IO ()
 acceptAll sock = do
-    (client, _) <- NS.accept sock
-    forkIO $ handle client
+    (client, _, _) <- accept sock
+    hSetBuffering client NoBuffering
+    forkIO $ handle client (Paradise.PlayerData 3) False
     acceptAll sock
 
 createServer :: PortNumber -> IO ()
