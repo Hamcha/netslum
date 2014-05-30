@@ -64,7 +64,7 @@ write text =
     B.concat $ List.intersperse "\r\n\r\n" $ map B.pack values
     where
     values = map (\x -> Map.findWithDefault "" x vesseldata)
-                 ["location","general","relative","tips"]
+                 ["location","general","note","relative","tips"]
     vesseldata = mapif $ JSON.decode $ L.fromStrict text
                  :: (Map.Map String String)
     mapif (Just x) = x
