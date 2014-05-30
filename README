@@ -4,10 +4,12 @@ netslum is a telnet interface to @aliceffekt's Paradise (paradise.xxiivv.com)
 
              .:..vim [optio'.: live demo :.-..it pus.o32i:..
 
-At the moment of writing the server doesn't work, I'm working on it.
+                     netslum.padrepio.in @ port 8484
 
-When basic functionality will be implemented, expect a server to pop up at
-netslum.padrepio.in @ port 8484
+If you have linux/OS X/*BSD, just "nc netslum.padrepio.in 8484"
+If you have Windows, use PuTTy! Set to "Telnet" and then change port.
+
+If the server crashed for some reason, ping me on Twitter (@hamcha) or here!
 
              ..:,.otc/rc.d .: why netslum :. .|grep..@512M:..
 
