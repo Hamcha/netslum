@@ -8,8 +8,9 @@ import           Control.Concurrent
 import           Control.Monad
 import qualified Data.ByteString.Char8 as B
 import           Network
-import qualified Paradise.Client as Paradise
 import qualified Paradise.API as API
+import qualified Paradise.Client as Paradise
+import           Paradise.Utils
 import           System.IO
 import           Text.Regex.PCRE
 
@@ -18,18 +19,33 @@ parse :: Handle -> Paradise.PlayerData -> B.ByteString
 parse client pdata result
     | result =~ API.vtRegexp = do
                                (newdata, res) <- API.goto pdata result
+                               B.hPutStrLn client clearScreenCode
                                B.hPutStrLn client res
+                               B.hPutStrLn client "\r\n"
                                return newdata
     | otherwise              = do
-                               B.hPutStrLn client result
-                               return pdata
+                               (newdata, res) <- API.update pdata
+                               B.hPutStrLn client clearScreenCode
+                               B.hPutStrLn client =<< stripHTML result
+                               B.hPutStrLn client "\r\n"
+                               B.hPutStrLn client res
+                               B.hPutStrLn client "\r\n"
+                               return newdata
 
 command :: Handle -> Paradise.PlayerData -> B.ByteString
            -> IO Paradise.PlayerData
+command client pdata "exit" = close client pdata
+command client pdata "quit" = close client pdata
 command client pdata line =
     API.act line pdata
     >>= parse client pdata
     >>= return
+
+close :: Handle -> Paradise.PlayerData -> IO Paradise.PlayerData
+close client pdata = do
+    B.hPutStrLn client "\r\nGoodbye!"
+    hClose client
+    return pdata
 
 handle :: Handle -> Paradise.PlayerData -> Bool -> IO ()
 handle client pdata True  = return ()
@@ -44,7 +60,10 @@ acceptAll :: Socket -> IO ()
 acceptAll sock = do
     (client, _, _) <- accept sock
     hSetBuffering client NoBuffering
-    forkIO $ handle client (Paradise.PlayerData "3" "13") False
+    forkIO $ do
+      let pdata = (Paradise.PlayerData "3")
+      parse client pdata "::3"
+      handle client pdata False
     acceptAll sock
 
 createServer :: PortNumber -> IO ()

@@ -3,17 +3,19 @@
 module Paradise.API
 ( act
 , goto
+, update
 , vtRegexp
 ) where
 
 import qualified Data.Aeson as JSON
 import qualified Data.ByteString.Char8 as B
-import qualified Data.ByteString.Lazy as L
+import qualified Data.ByteString.Lazy  as L
 import qualified Data.List as List
 import qualified Data.Map  as Map
 import           Network.HTTP
 import           Network.HTTP.Base
 import           Paradise.Client
+import           Paradise.Utils
 import           Text.Regex.PCRE
 
 baseParadise :: String
@@ -38,14 +40,19 @@ get :: PlayerData -> IO B.ByteString
 get pdata =
     simpleHTTP (getRequest url)
     >>= getResponseBody
-    >>= (\x -> return $ B.pack x)
+    >>= (\x -> stripHTML $ B.pack x)
+    >>= return
     where
     url = concat [baseParadise,
                   "/router.php?route=general",
                   "&vessel=", B.unpack $ vessel pdata]
 
+update :: PlayerData -> IO (PlayerData, B.ByteString)
+update pdata =
+    get pdata >>= (\x -> return (pdata, write x) )
+
 goto :: PlayerData -> B.ByteString -> IO (PlayerData, B.ByteString)
-goto pdata action = do
+goto pdata action =
     get newdata >>= (\x -> return (newdata, write x) )
     where
     newdata = pdata{vessel = vesselId}
