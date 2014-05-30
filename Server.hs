@@ -16,23 +16,17 @@ import           Text.Regex.PCRE
 
 parse :: Handle -> Paradise.PlayerData -> B.ByteString
          -> IO Paradise.PlayerData
-parse client pdata result
-    | result =~ API.vtRegexp = do
-                               (newdata, res) <- API.goto pdata result
-                               B.hPutStrLn client clearScreenCode
-                               B.hPutStrLn client homeRowCode
-                               B.hPutStrLn client res
-                               B.hPutStrLn client "\r\n"
-                               return newdata
-    | otherwise              = do
-                               (newdata, res) <- API.update pdata
-                               B.hPutStrLn client clearScreenCode
-                               B.hPutStrLn client homeRowCode
-                               B.hPutStrLn client =<< stripHTML result
-                               B.hPutStrLn client "\r\n"
-                               B.hPutStrLn client res
-                               B.hPutStrLn client "\r\n"
-                               return newdata
+parse client pdata result = do
+    B.hPutStrLn client clearScreenCode
+    B.hPutStrLn client homeRowCode
+    let action p r | r =~ API.vtRegexp = API.goto p r
+                   | otherwise         = do
+                                         B.hPutStrLn client =<< stripHTML result
+                                         API.update p
+    (newdata, res) <- action pdata result
+    B.hPutStrLn client res
+    B.hPutStrLn client "\r\n"
+    return newdata
 
 command :: Handle -> Paradise.PlayerData -> B.ByteString
            -> IO Paradise.PlayerData
