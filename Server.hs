@@ -17,8 +17,8 @@ import           Text.Regex.PCRE
 parse :: Handle -> Paradise.PlayerData -> B.ByteString
          -> IO Paradise.PlayerData
 parse client pdata result = do
-    B.hPutStrLn client clearScreenCode
-    B.hPutStrLn client homeRowCode
+    B.hPutStr client clearScreenCode
+    B.hPutStr client homeRowCode
     let action p r | r =~ API.vtRegexp = API.goto p r
                    | otherwise         = do
                                          B.hPutStr client =<< stripHTML result
@@ -40,7 +40,7 @@ command client pdata line =
 
 close :: Handle -> Paradise.PlayerData -> IO Paradise.PlayerData
 close client pdata = do
-    B.hPutStrLn client "\r\nGoodbye!"
+    B.hPutStr client "\r\nGoodbye!\r\n"
     hClose client
     return pdata
 
